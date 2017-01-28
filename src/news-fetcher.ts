@@ -17,6 +17,7 @@ export class NewsFetcher {
 
   private allowedNewsSource(newsItem: NewsItem, feed: Feed): boolean {
     if (newsItem.title == '' || newsItem.content == '') return false;
+    if (newsItem.title == null || newsItem.content == null) return false;
 
     if (FEEDS[feed.url].directlyAllowed) return true;
 
@@ -42,17 +43,20 @@ export class NewsFetcher {
 
             if (newsItems != null) {
               for (let newsItem of newsItems) {
-                let id = ((newsItem.title.toLowerCase() + '-' + newsItem.pubDate).split(' ').join('-')).replace(/\./g,'-').replace(/[\r\n]/g, "-");
+                let id = ((newsItem.title.toLowerCase() + '-' + newsItem.pubDate).split(' ').join('-')).replace(/\./g,'-').replace(/[\r\n]/g, "-").replace('/', '-');
 
                 if (this.allowedNewsSource(newsItem, feed)) {
-                  console.log(newsItem.title);
-                  this._newsRef.child('/' + id).set({
-                    title: newsItem.title,
-                    source: FEEDS[feed.url].name,
-                    url: newsItem.link,
-                    pubDate: moment(newsItem.pubDate).unix(),
-                    content: newsItem.content
-                  });
+                  if (newsItem.title != '' || newsItem.title != null || newsItem.title != ' ') {
+                    console.log(id);
+                    this._newsRef.child('/' + id).set({
+                      title: newsItem.title,
+                      source: FEEDS[feed.url].name,
+                      url: newsItem.link,
+                      pubDate: moment(newsItem.pubDate).unix(),
+                      content: newsItem.content
+
+                    });
+                  }
                 }
               }
             }
